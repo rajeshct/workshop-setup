@@ -20,39 +20,24 @@ Security — API Key Safety:
 import asyncio
 import sys, os; sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from google.adk.agents import LlmAgent
-from google.adk.runners import Runner
-from google.adk.sessions import InMemorySessionService
-from google.genai import types
 
-from agent_config import get_model
+from agent_config import get_model, build_runner_no_opik, run_agent
 
 # --- Agent ---
-# instruction = system prompt: defines the agent's role, scope, and behaviour
 agent = LlmAgent(
     name="HelloAgent",
-    model=get_model(),                  # gemini-2.0-flash or ollama/llama3.2 from .env
+    model=get_model(),
     instruction="You are a helpful assistant for engineering students and faculty. "
                 "Answer questions clearly and concisely.",
     description="A simple single-turn agent — the baseline for all other patterns.",
 )
 
-# build_runner creates: Runner + InMemorySessionService
-session_service = InMemorySessionService()
-runner = Runner(agent=agent, app_name="hello-agent", session_service=session_service)
+runner, session_service = build_runner_no_opik(agent, app_name="hello-agent")
 
 
 # --- Entrypoint ---
 async def ask(question: str) -> str:
-    session = await session_service.create_session(app_name="hello-agent", user_id="user-1")
-    result_text = ""
-    async for event in runner.run_async(
-        user_id="user-1",
-        session_id=session.id,
-        new_message=types.Content(role="user", parts=[types.Part(text=question)]),
-    ):
-        if event.is_final_response() and event.content and event.content.parts:
-            result_text = event.content.parts[0].text
-    return result_text
+    return await run_agent(runner, session_service, question, app_name="hello-agent")
 
 
 if __name__ == "__main__":
