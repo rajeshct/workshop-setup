@@ -18,11 +18,6 @@ Note — pre-fetching pattern used here:
   So fetch_college_info() is called in Python first and the result is injected
   into the message before sending to the LLM. This is a valid production
   pattern too — it gives you more control over what data is sent.
-  OPIK still shows the full enriched prompt the model received.
-
-What OPIK shows:
-  The LLM input span contains the live data fetched from gat.ac.in — you can
-  read exactly what the model reasoned over to produce its answer.
 
 Security — Input Validation:
   Validate input before fetching any external URL. Whitelist allowed pages
@@ -36,10 +31,11 @@ import requests
 from html.parser import HTMLParser
 
 from google.adk.agents import LlmAgent
+from google.adk.runners import Runner
+from google.adk.sessions import InMemorySessionService
+from google.genai import types
 
-from agent_config import get_model, build_runner, run_agent
-
-
+from agent_config import get_model
 
 
 # --- Tool ---
@@ -97,13 +93,13 @@ agent = LlmAgent(
     description="Answers questions about GAT college using live data from the website.",
 )
 
-runner, session_service = build_runner(agent, app_name="tool-agent")
+session_service = InMemorySessionService()
+runner = Runner(agent=agent, app_name="tool-agent", session_service=session_service)
 
 
 # --- Entrypoint ---
 # Pre-fetching pattern: fetch data in Python first, inject into message
 # This gives full control over what data the LLM sees before reasoning
-
 
 async def ask(question: str) -> str:
     college_data = fetch_college_info("contact")
@@ -112,7 +108,16 @@ async def ask(question: str) -> str:
         f"Live data from GAT website (gat.ac.in):\n{college_data}\n\n"
         f"Please answer the question using the data above."
     )
-    return await run_agent(runner, session_service, enriched, app_name="tool-agent")
+    session = await session_service.create_session(app_name="tool-agent", user_id="user-1")
+    result_text = ""
+    async for event in runner.run_async(
+        user_id="user-1",
+        session_id=session.id,
+        new_message=types.Content(role="user", parts=[types.Part(text=enriched)]),
+    ):
+        if event.is_final_response() and event.content and event.content.parts:
+            result_text = event.content.parts[0].text
+    return result_text
 
 
 if __name__ == "__main__":
@@ -120,6 +125,3 @@ if __name__ == "__main__":
     print(f"Question: {question}\n")
     print("=" * 60)
     print(asyncio.run(ask(question)))
-
-    print("\n[OPIK] Open the 'tool_agent' trace → click the llm span")
-    print("       The LLM input shows the live data fetched from gat.ac.in")
