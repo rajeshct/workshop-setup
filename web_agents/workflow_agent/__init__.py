@@ -5,28 +5,45 @@ from dotenv import load_dotenv, find_dotenv
 load_dotenv(find_dotenv())
 
 from google.adk.agents import SequentialAgent, LlmAgent
-from agent_config import ProxyGemini, GEMINI_MODEL, load_config
+from agent_config import ProxyGemini, GEMINI_MODEL
 
-cfg    = load_config("03_workflow_agent_config.yaml")
-r_cfg  = cfg["agents"]["content_researcher"]
-lp_cfg = cfg["agents"]["lecture_planner"]
-
-researcher = LlmAgent(
-    name="ContentResearcher",
+concept_analyser = LlmAgent(
+    name="ConceptAnalyser",
     model=ProxyGemini(model=GEMINI_MODEL),
-    instruction=r_cfg["instruction"],
-    description=r_cfg["description"],
+    instruction="""You are a senior engineering professor and curriculum expert.
+    Given a topic, identify:
+    - 3-4 core concepts students must understand
+    - Common misconceptions or tricky areas
+    - What easy, medium, and hard questions would test for this topic
+    Be concise — this output feeds directly into the exam generator.""",
+    description="Analyses a topic and identifies key concepts and difficulty levels.",
 )
 
-lecture_planner = LlmAgent(
-    name="LecturePlanner",
+exam_generator = LlmAgent(
+    name="ExamGenerator",
     model=ProxyGemini(model=GEMINI_MODEL),
-    instruction=lp_cfg["instruction"],
-    description=lp_cfg["description"],
+    instruction="""You are an experienced engineering exam setter.
+    Given a concept analysis of a topic, generate a complete exam paper with:
+
+    ## Multiple Choice Questions (5 questions)
+    - 2 easy, 2 medium, 1 hard
+    - 4 options each (A/B/C/D)
+    - Mark the correct answer
+
+    ## Descriptive Questions (2 questions)
+    - 1 medium (5 marks): tests understanding
+    - 1 hard (10 marks): tests application/analysis
+
+    ## Answer Key
+    - MCQ answers with brief explanation
+    - Descriptive answer guidelines (key points to award marks)
+
+    Format it cleanly — ready to print and distribute.""",
+    description="Generates a complete exam paper with answer keys from concept analysis.",
 )
 
 root_agent = SequentialAgent(
-    name="LecturePrepPipeline",
-    description="Hi! I am the Lecture Prep Pipeline. Enter an engineering topic and I will research it and generate a structured lecture plan.",
-    sub_agents=[researcher, lecture_planner],
+    name="ExamPaperPipeline",
+    description="Pattern 3 — I generate a complete exam paper from a topic. Try: 'Binary Search Trees — insertion, deletion, and traversal algorithms'",
+    sub_agents=[concept_analyser, exam_generator],
 )
