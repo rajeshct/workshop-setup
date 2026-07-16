@@ -10,30 +10,39 @@ from opik.integrations.adk import OpikTracer, track_adk_agent_recursive
 
 setup_opik()
 
-improver = LlmAgent(
-    name="EssayImprover",
+report_improver = LlmAgent(
+    name="ReportImprover",
     model=ProxyGemini(model=GEMINI_MODEL),
-    instruction="You are an academic writing tutor. "
-                "Improve the essay: add specific facts, strengthen arguments, "
-                "improve vocabulary. Return only the improved essay.",
-    description="Improves essay quality.",
+    instruction="""You are an engineering lab report writing coach.
+    Improve the lab report to include all required sections:
+    - Aim: clear objective of the experiment
+    - Apparatus: list of equipment used with specifications
+    - Theory: explain Ohm's Law (V=IR) with relevant formulas
+    - Procedure: step-by-step method followed
+    - Observations: table with voltage and current readings
+    - Conclusion: what was verified and sources of error
+
+    Improve the scientific language and technical accuracy.
+    Return the complete improved report.""",
+    description="Improves lab report quality and completeness.",
 )
 
-evaluator = LlmAgent(
-    name="QualityEvaluator",
+report_evaluator = LlmAgent(
+    name="ReportEvaluator",
     model=ProxyGemini(model=GEMINI_MODEL),
-    instruction="You are an essay evaluator. Score the essay 1-10 and respond in "
-                "EXACTLY this format:\n"
-                "SCORE: X\n"
-                "FEEDBACK: one sentence\n"
-                "CONTINUE: YES or NO  (YES if score < 8, NO if score >= 8)",
-    description="Scores the essay and decides whether to loop.",
+    instruction="""You are a lab report examiner at an engineering college.
+    Evaluate the report and respond in EXACTLY this format:
+    SCORE: X
+    MISSING_SECTIONS: list any of (Aim/Apparatus/Theory/Procedure/Observations/Conclusion) that are missing or incomplete
+    FEEDBACK: one sentence on what needs most improvement
+    CONTINUE: YES or NO  (YES if score < 8 or any section is missing, NO if score >= 8 and all sections present)""",
+    description="Evaluates lab report completeness and quality, decides whether to loop.",
 )
 
 root_agent = LoopAgent(
-    name="EssayRefinementLoop",
-    description="Hi! I am the GAT Lab Report Improver. Paste a weak lab report and I will automatically improve it until it meets the required standard (score >= 8/10).",
-    sub_agents=[improver, evaluator],
+    name="LabReportRefinementLoop",
+    description="Pattern 7 — I improve a lab report automatically until score >= 8/10. Paste the weak report below:\n\nLab Experiment: Ohm's Law\n\nWe did an experiment with a resistor and battery. We connected them with wires. We measured voltage and current. The results showed they are related. Ohm's law says V = IR. Our experiment proved this is correct.",
+    sub_agents=[report_improver, report_evaluator],
     max_iterations=4,
 )
 
