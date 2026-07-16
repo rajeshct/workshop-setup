@@ -20,8 +20,11 @@ Security — API Key Safety:
 import asyncio
 import sys, os; sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from google.adk.agents import LlmAgent
+from google.adk.runners import Runner
+from google.adk.sessions import InMemorySessionService
+from google.genai import types
 
-from agent_config import get_model, build_runner, run_agent
+from agent_config import get_model
 
 # --- Agent ---
 # instruction = system prompt: defines the agent's role, scope, and behaviour
@@ -34,12 +37,22 @@ agent = LlmAgent(
 )
 
 # build_runner creates: Runner + InMemorySessionService
-runner, session_service = build_runner(agent, app_name="hello-agent")
+session_service = InMemorySessionService()
+runner = Runner(agent=agent, app_name="hello-agent", session_service=session_service)
 
 
 # --- Entrypoint ---
 async def ask(question: str) -> str:
-    return await run_agent(runner, session_service, question, app_name="hello-agent")
+    session = await session_service.create_session(app_name="hello-agent", user_id="user-1")
+    result_text = ""
+    async for event in runner.run_async(
+        user_id="user-1",
+        session_id=session.id,
+        new_message=types.Content(role="user", parts=[types.Part(text=question)]),
+    ):
+        if event.is_final_response() and event.content and event.content.parts:
+            result_text = event.content.parts[0].text
+    return result_text
 
 
 if __name__ == "__main__":
