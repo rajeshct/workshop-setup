@@ -7,10 +7,7 @@ load_dotenv(find_dotenv())
 import requests
 from html.parser import HTMLParser
 from google.adk.agents import LlmAgent
-from agent_config import ProxyGemini, GEMINI_MODEL, setup_opik
-from opik.integrations.adk import OpikTracer, track_adk_agent_recursive
-
-setup_opik()
+from agent_config import ProxyGemini, GEMINI_MODEL
 
 
 def fetch_college_info(page: str = "contact") -> str:
@@ -56,6 +53,3 @@ root_agent = LlmAgent(
     description="Ask me anything about GAT — contact, address, admissions. I fetch live data from gat.ac.in.",
     tools=[fetch_college_info],
 )
-
-_tracer = OpikTracer()
-track_adk_agent_recursive(root_agent, _tracer)
