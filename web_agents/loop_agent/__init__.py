@@ -21,12 +21,8 @@ Ohm's law says V = IR. Our experiment proved this is correct.
 report_improver = LlmAgent(
     name="ReportImprover",
     model=ProxyGemini(model=GEMINI_MODEL),
-    instruction=f"""You are an engineering lab report writing coach.
-
-Here is the lab report to improve:
-{WEAK_REPORT}
-
-Improve it to include all required sections:
+    instruction="""You are an engineering lab report writing coach.
+    Improve the lab report to include all required sections:
     - Aim: clear objective of the experiment
     - Apparatus: list of equipment used with specifications
     - Theory: explain Ohm's Law (V=IR) with relevant formulas
@@ -34,8 +30,8 @@ Improve it to include all required sections:
     - Observations: table with voltage and current readings
     - Conclusion: what was verified and sources of error
 
-Improve the scientific language and technical accuracy.
-Return the complete improved report.""",
+    Improve the scientific language and technical accuracy.
+    Return the complete improved report.""",
     description="Improves lab report quality and completeness.",
 )
 
@@ -53,7 +49,11 @@ report_evaluator = LlmAgent(
 
 root_agent = LoopAgent(
     name="LabReportRefinementLoop",
-    description="Pattern 7 — Send any message (e.g. 'start') to improve the pre-loaded weak Ohm's Law lab report automatically until score >= 8/10.",
+    description=(
+        "Pattern 7 — Paste the weak lab report below as your message and I will improve it automatically until score >= 8/10.\n\n"
+        "--- PASTE THIS ---\n"
+        + WEAK_REPORT.strip()
+    ),
     sub_agents=[report_improver, report_evaluator],
     max_iterations=4,
 )
