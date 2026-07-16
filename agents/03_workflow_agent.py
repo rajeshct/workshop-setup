@@ -26,11 +26,8 @@ import asyncio
 import sys, os; sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from google.adk.agents import SequentialAgent, LlmAgent
-from google.adk.runners import Runner
-from google.adk.sessions import InMemorySessionService
-from google.genai import types
 
-from agent_config import get_model
+from agent_config import get_model, build_runner_no_opik, run_agent
 
 
 # --- Agents ---
@@ -76,21 +73,11 @@ pipeline = SequentialAgent(
     sub_agents=[concept_analyser, exam_generator],
 )
 
-session_service = InMemorySessionService()
-runner = Runner(agent=pipeline, app_name="workflow-agent", session_service=session_service)
+runner, session_service = build_runner_no_opik(pipeline, app_name="workflow-agent")
 
 
 async def generate_exam(topic: str) -> str:
-    session = await session_service.create_session(app_name="workflow-agent", user_id="user-1")
-    result_text = ""
-    async for event in runner.run_async(
-        user_id="user-1",
-        session_id=session.id,
-        new_message=types.Content(role="user", parts=[types.Part(text=topic)]),
-    ):
-        if event.is_final_response() and event.content and event.content.parts:
-            result_text = event.content.parts[0].text
-    return result_text
+    return await run_agent(runner, session_service, topic, app_name="workflow-agent")
 
 
 if __name__ == "__main__":
