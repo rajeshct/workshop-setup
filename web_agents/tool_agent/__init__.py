@@ -7,12 +7,11 @@ load_dotenv(find_dotenv())
 import requests
 from html.parser import HTMLParser
 from google.adk.agents import LlmAgent
-from google.adk.agents.invocation_context import InvocationContext
 from agent_config import ProxyGemini, GEMINI_MODEL
 
 
 def fetch_college_info(page: str = "contact") -> str:
-    """Fetch information from the Global Academy of Technology (GAT) website."""
+    """Fetch live information from the Global Academy of Technology (GAT) website."""
     urls = {"contact": "https://www.gat.ac.in/contact-us.html"}
     try:
         headers = {"User-Agent": "Mozilla/5.0 (compatible; educational-demo/1.0)"}
@@ -44,35 +43,13 @@ def fetch_college_info(page: str = "contact") -> str:
         return f"Failed to fetch page: {e}"
 
 
-class GATInfoAgent(LlmAgent):
-    async def _run_async_impl(self, ctx: InvocationContext):
-        user_msg = ""
-        for event in reversed(ctx.session.events):
-            if hasattr(event, "author") and event.author == "user":
-                if event.content and event.content.parts:
-                    user_msg = event.content.parts[0].text
-                    break
-        if user_msg and "Live data from GAT" not in user_msg:
-            college_data = fetch_college_info("contact")
-            enriched = (
-                f"Question: {user_msg}\n\n"
-                f"Live data from GAT website (gat.ac.in):\n{college_data}\n\n"
-                f"Please answer the question using the data above."
-            )
-            for event in reversed(ctx.session.events):
-                if hasattr(event, "author") and event.author == "user":
-                    if event.content and event.content.parts:
-                        event.content.parts[0].text = enriched
-                        break
-        async for e in super()._run_async_impl(ctx):
-            yield e
-
-
-root_agent = GATInfoAgent(
+root_agent = LlmAgent(
     name="GATInfoAgent",
     model=ProxyGemini(model=GEMINI_MODEL),
-    instruction="When the conversation starts, greet the user with: 'Hi! I am the GAT Assistant. How can I help you today?' Then proceed to answer their questions. You are a helpful information assistant for Global Academy of Technology (GAT), "
-                "Bengaluru. The user's message contains a question followed by live data fetched "
-                "from the GAT website. Answer the question using that data. Be concise and helpful.",
+    instruction="When the conversation starts, greet the user with: 'Hi! I am the GAT Assistant. How can I help you today?' "
+                "You are a helpful information assistant for Global Academy of Technology (GAT), Bengaluru. "
+                "Use the fetch_college_info tool to get live data from the GAT website, "
+                "then answer the user's question using that data. Be concise and helpful.",
     description="Ask me anything about GAT — contact, address, admissions. I fetch live data from gat.ac.in.",
+    tools=[fetch_college_info],
 )
