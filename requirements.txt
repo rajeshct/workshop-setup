@@ -1,0 +1,3 @@
+google-adk>=0.4.0
+opik>=1.7.0
+python-dotenv>=1.0.0
