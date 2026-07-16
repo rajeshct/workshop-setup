@@ -2,12 +2,14 @@
 Shared helpers used by all agent scripts.
 
 Provides:
-  - get_model()    : returns ProxyGemini, LiteLlm(Ollama), or LiteLlm(Gemma4) based on .env
-  - ProxyGemini    : Gemini model wired to the local proxy + API key, with retry
-  - setup_opik()   : configure OPIK once from .env
-  - build_runner() : create a Runner + InMemorySessionService for an agent
-  - run_agent()    : run any agent and return the final response text
-  - load_config()  : load a YAML config, resolving *_file keys to file contents
+  - get_model()             : returns ProxyGemini, LiteLlm(Ollama), or LiteLlm(Gemma4) based on .env
+  - ProxyGemini             : Gemini model wired to the local proxy + API key, with retry
+  - setup_opik()            : configure OPIK once from .env
+  - build_runner_no_opik()  : create a plain Runner + InMemorySessionService (no tracing)
+  - build_runner()          : same, but also attaches OpikTracer for full tracing
+  - run_agent()             : run any agent and return the final response text
+  - run_agent_multiturn()   : run with session reuse for multi-turn conversations
+  - load_config()           : load a YAML config, resolving *_file keys to file contents
 
 Model selection via .env  (set GEMINI_MODEL= to one of these):
   gemini-2.5-flash            → Gemini 2.5 Flash via proxy    5 RPM / 20 RPD
@@ -103,7 +105,14 @@ def setup_opik(project_name: str = "engineering-faculty-assistant") -> None:
     )
 
 
-# ── Runner factory ─────────────────────────────────────────────────────────────
+# ── Runner factories ───────────────────────────────────────────────────────────
+
+def build_runner_no_opik(agent, app_name: str) -> tuple:
+    """Create a plain Runner with no tracing. Returns (runner, session_service)."""
+    session_service = InMemorySessionService()
+    runner = Runner(agent=agent, app_name=app_name, session_service=session_service)
+    return runner, session_service
+
 
 def build_runner(agent, app_name: str) -> tuple:
     """Create a Runner and attach OPIK tracing. Returns (runner, session_service)."""

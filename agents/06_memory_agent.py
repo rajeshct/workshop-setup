@@ -25,11 +25,8 @@ Security — PII in Session History:
 import asyncio
 import sys, os; sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from google.adk.agents import LlmAgent
-from google.adk.runners import Runner
-from google.adk.sessions import InMemorySessionService
-from google.genai import types
 
-from agent_config import get_model
+from agent_config import get_model, build_runner_no_opik, run_agent_multiturn
 
 # --- Agent ---
 # Identical to Pattern 1A — the only difference is HOW we call it (session_id reuse)
@@ -44,32 +41,18 @@ agent = LlmAgent(
     description="Tracks student progress across a conversation and gives personalised advice.",
 )
 
-# ... same Runner setup as Pattern 1A ...
-session_service = InMemorySessionService()
-runner = Runner(agent=agent, app_name="memory-agent", session_service=session_service)
+# ... same build_runner_no_opik as Pattern 1A ...
+runner, session_service = build_runner_no_opik(agent, app_name="memory-agent")
 
 
 # --- Entrypoint ---
 # session_id is returned on the first call and reused on subsequent calls
 # This threads all turns into a single shared conversation history
 async def advise(message: str, session_id: str = None) -> tuple:
-    if session_id:
-        session = await session_service.get_session(
-            app_name="memory-agent", user_id="user-1", session_id=session_id
-        )
-    else:
-        session = await session_service.create_session(
-            app_name="memory-agent", user_id="user-1"
-        )
-    result_text = ""
-    async for event in runner.run_async(
-        user_id="user-1",
-        session_id=session.id,
-        new_message=types.Content(role="user", parts=[types.Part(text=message)]),
-    ):
-        if event.is_final_response() and event.content and event.content.parts:
-            result_text = event.content.parts[0].text
-    return result_text, session.id
+    return await run_agent_multiturn(
+        runner, session_service, message,
+        app_name="memory-agent", session_id=session_id,
+    )
 
 
 if __name__ == "__main__":
