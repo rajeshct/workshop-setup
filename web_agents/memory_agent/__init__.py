@@ -5,10 +5,7 @@ from dotenv import load_dotenv, find_dotenv
 load_dotenv(find_dotenv())
 
 from google.adk.agents import LlmAgent
-from agent_config import ProxyGemini, GEMINI_MODEL, setup_opik
-from opik.integrations.adk import OpikTracer, track_adk_agent_recursive
-
-setup_opik()
+from agent_config import ProxyGemini, GEMINI_MODEL
 
 # Pattern 1B — same LlmAgent as hello_agent but session memory is maintained
 # across the conversation by ADK Web UI automatically
@@ -20,6 +17,3 @@ root_agent = LlmAgent(
                 "and use that context in every response.",
     description="Pattern 1B — I remember our full conversation. Tell me about a student's progress across multiple turns.",
 )
-
-_tracer = OpikTracer()
-track_adk_agent_recursive(root_agent, _tracer)
