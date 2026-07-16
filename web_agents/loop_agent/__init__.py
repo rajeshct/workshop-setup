@@ -10,11 +10,23 @@ from opik.integrations.adk import OpikTracer, track_adk_agent_recursive
 
 setup_opik()
 
+WEAK_REPORT = """
+Lab Experiment: Ohm's Law
+
+We did an experiment with a resistor and battery. We connected them with wires.
+We measured voltage and current. The results showed they are related.
+Ohm's law says V = IR. Our experiment proved this is correct.
+"""
+
 report_improver = LlmAgent(
     name="ReportImprover",
     model=ProxyGemini(model=GEMINI_MODEL),
-    instruction="""You are an engineering lab report writing coach.
-    Improve the lab report to include all required sections:
+    instruction=f"""You are an engineering lab report writing coach.
+
+Here is the lab report to improve:
+{WEAK_REPORT}
+
+Improve it to include all required sections:
     - Aim: clear objective of the experiment
     - Apparatus: list of equipment used with specifications
     - Theory: explain Ohm's Law (V=IR) with relevant formulas
@@ -22,8 +34,8 @@ report_improver = LlmAgent(
     - Observations: table with voltage and current readings
     - Conclusion: what was verified and sources of error
 
-    Improve the scientific language and technical accuracy.
-    Return the complete improved report.""",
+Improve the scientific language and technical accuracy.
+Return the complete improved report.""",
     description="Improves lab report quality and completeness.",
 )
 
@@ -41,7 +53,7 @@ report_evaluator = LlmAgent(
 
 root_agent = LoopAgent(
     name="LabReportRefinementLoop",
-    description="Pattern 7 — I improve a lab report automatically until score >= 8/10. Paste the weak report below:\n\nLab Experiment: Ohm's Law\n\nWe did an experiment with a resistor and battery. We connected them with wires. We measured voltage and current. The results showed they are related. Ohm's law says V = IR. Our experiment proved this is correct.",
+    description="Pattern 7 — Send any message (e.g. 'start') to improve the pre-loaded weak Ohm's Law lab report automatically until score >= 8/10.",
     sub_agents=[report_improver, report_evaluator],
     max_iterations=4,
 )
