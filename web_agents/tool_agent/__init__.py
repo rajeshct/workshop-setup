@@ -11,11 +11,12 @@ from agent_config import ProxyGemini, GEMINI_MODEL
 
 
 def fetch_college_info(page: str = "contact") -> str:
-    """Fetch live information from the Global Academy of Technology (GAT) website."""
+    """Fetch information from the Global Academy of Technology (GAT) website."""
     urls = {"contact": "https://www.gat.ac.in/contact-us.html"}
+    url = urls.get(page, urls["contact"])
     try:
         headers = {"User-Agent": "Mozilla/5.0 (compatible; educational-demo/1.0)"}
-        response = requests.get(urls.get(page, urls["contact"]), headers=headers, timeout=10)
+        response = requests.get(url, headers=headers, timeout=10)
         response.raise_for_status()
 
         class TextExtractor(HTMLParser):
@@ -43,13 +44,14 @@ def fetch_college_info(page: str = "contact") -> str:
         return f"Failed to fetch page: {e}"
 
 
+college_data = fetch_college_info("contact")
+
 root_agent = LlmAgent(
     name="GATInfoAgent",
     model=ProxyGemini(model=GEMINI_MODEL),
-    instruction="When the conversation starts, greet the user with: 'Hi! I am the GAT Assistant. How can I help you today?' "
-                "You are a helpful information assistant for Global Academy of Technology (GAT), Bengaluru. "
-                "Use the fetch_college_info tool to get live data from the GAT website, "
-                "then answer the user's question using that data. Be concise and helpful.",
-    description="Ask me anything about GAT — contact, address, admissions. I fetch live data from gat.ac.in.",
-    tools=[fetch_college_info],
+    instruction="You are a helpful information assistant for Global Academy of Technology (GAT), "
+                "Bengaluru. The user's message contains a question followed by live data fetched "
+                "from the GAT website. Answer the question using that data. Be concise and helpful.\n\n"
+                f"Live data from GAT website (gat.ac.in):\n{college_data}",
+    description="Pattern 2 — Ask me anything about GAT. Try: 'What is the contact number and email address for GAT admissions?'",
 )
