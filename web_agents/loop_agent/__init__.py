@@ -10,14 +10,6 @@ from opik.integrations.adk import OpikTracer, track_adk_agent_recursive
 
 setup_opik()
 
-WEAK_REPORT = """
-Lab Experiment: Ohm's Law
-
-We did an experiment with a resistor and battery. We connected them with wires.
-We measured voltage and current. The results showed they are related.
-Ohm's law says V = IR. Our experiment proved this is correct.
-"""
-
 report_improver = LlmAgent(
     name="ReportImprover",
     model=ProxyGemini(model=GEMINI_MODEL),
@@ -49,11 +41,7 @@ report_evaluator = LlmAgent(
 
 root_agent = LoopAgent(
     name="LabReportRefinementLoop",
-    description=(
-        "Pattern 7 — Paste the weak lab report below as your message and I will improve it automatically until score >= 8/10.\n\n"
-        "--- PASTE THIS ---\n"
-        + WEAK_REPORT.strip()
-    ),
+    description="Pattern 7 — Paste the weak lab report as your message and I will improve it automatically until score >= 8/10.\n\nSample input:\nLab Experiment: Ohm's Law\n\nWe did an experiment with a resistor and battery. We connected them with wires. We measured voltage and current. The results showed they are related. Ohm's law says V = IR. Our experiment proved this is correct.",
     sub_agents=[report_improver, report_evaluator],
     max_iterations=4,
 )
