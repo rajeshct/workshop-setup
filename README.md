@@ -278,6 +278,14 @@ code .
 
 A virtual environment keeps this project's packages isolated from the rest of your system.
 
+The `requirements.txt` file installs these packages:
+
+| Package | Minimum Version | Purpose |
+|---|---|---|
+| `google-adk` | 0.4.0 | Google Agent Development Kit |
+| `opik` | 1.7.0 | Comet OPIK observability |
+| `python-dotenv` | 1.0.0 | Load `.env` configuration |
+
 ### macOS
 
 ```bash
@@ -323,10 +331,10 @@ pip install -r requirements.txt
 ### Verify installation
 
 ```bash
-pip show google-adk opik
+pip show google-adk opik python-dotenv
 ```
 
-You should see version information for both packages.
+You should see name and version information for all three packages.
 
 ---
 
