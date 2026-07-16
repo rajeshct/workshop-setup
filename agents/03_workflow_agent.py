@@ -1,6 +1,6 @@
 """
-Pattern 3 — Workflow Agent: Sequential Pipeline
--------------------------------------------------
+Pattern 3 — Workflow Agent: Sequential Pipeline (without Opik)
+---------------------------------------------------------------
 New concept: SequentialAgent — chain agents in a pipeline.
 
 SequentialAgent runs child agents one after another. The output of each
@@ -16,11 +16,6 @@ Instruction design for pipelines:
   First agent:  "Be concise — this output feeds directly into the next step."
   Second agent: "Given the analysis above, generate a complete exam paper."
 
-What OPIK shows:
-  Two child spans in sequence — ConceptAnalyser finishes, then ExamGenerator
-  starts. Click the ConceptAnalyser span output to see exactly what text
-  flows into ExamGenerator as input.
-
 Security — Instruction Hardening:
   Be explicit in every agent's instruction about what it should and should
   not do. Vague instructions produce off-topic or inappropriate content.
@@ -31,9 +26,11 @@ import asyncio
 import sys, os; sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from google.adk.agents import SequentialAgent, LlmAgent
+from google.adk.runners import Runner
+from google.adk.sessions import InMemorySessionService
+from google.genai import types
 
-from agent_config import get_model, build_runner, run_agent
-
+from agent_config import get_model
 
 
 # --- Agents ---
@@ -79,12 +76,21 @@ pipeline = SequentialAgent(
     sub_agents=[concept_analyser, exam_generator],
 )
 
-runner, session_service = build_runner(pipeline, app_name="workflow-agent")
-
+session_service = InMemorySessionService()
+runner = Runner(agent=pipeline, app_name="workflow-agent", session_service=session_service)
 
 
 async def generate_exam(topic: str) -> str:
-    return await run_agent(runner, session_service, topic, app_name="workflow-agent")
+    session = await session_service.create_session(app_name="workflow-agent", user_id="user-1")
+    result_text = ""
+    async for event in runner.run_async(
+        user_id="user-1",
+        session_id=session.id,
+        new_message=types.Content(role="user", parts=[types.Part(text=topic)]),
+    ):
+        if event.is_final_response() and event.content and event.content.parts:
+            result_text = event.content.parts[0].text
+    return result_text
 
 
 if __name__ == "__main__":
@@ -95,6 +101,3 @@ if __name__ == "__main__":
     print("This agent does both steps automatically.\n")
     print("=" * 60)
     print(asyncio.run(generate_exam(topic)))
-
-    print("\n[OPIK] Open the 'workflow_agent' trace → expand the SequentialAgent span")
-    print("       Click ConceptAnalyser output — that exact text becomes ExamGenerator input")
