@@ -49,19 +49,45 @@ _RETRY_OPTIONS = types.HttpRetryOptions(
 
 # ── Gemini proxy ───────────────────────────────────────────────────────────────
 
+def _patch_client_for_proxy(client: Client) -> Client:
+    """Patch a genai Client so thoughtSignature is stripped from every request.
+
+    The local proxy rejects multi-turn requests that carry thoughtSignature in
+    content parts. ADK routes calls through client.aio._api_client, so we patch
+    _build_request on that underlying BaseApiClient instance.
+    """
+    base = client.aio._api_client
+    original_build = base._build_request
+
+    def _build_request_patched(http_method, path, request_dict, http_options=None):
+        if 'generateContent' in path:
+            for content in request_dict.get('contents', []):
+                for part in content.get('parts', []):
+                    part.pop('thoughtSignature', None)
+        return original_build(http_method, path, request_dict, http_options)
+
+    base._build_request = _build_request_patched
+    return client
+
+
 class ProxyGemini(Gemini):
     """Gemini model — routes through a local proxy if GOOGLE_GEMINI_BASE_URL is set,
-    otherwise calls Google's API directly. Retries automatically on 429."""
+    otherwise calls Google's API directly. Retries automatically on 429.
+
+    Strips thoughtSignature from history parts before each request — the proxy
+    rejects multi-turn requests that carry this field in contents.
+    """
     @cached_property
     def api_client(self) -> Client:
         base_url = os.getenv("GOOGLE_GEMINI_BASE_URL")
-        return Client(
+        client = Client(
             api_key=os.getenv("GEMINI_API_KEY"),
             http_options=HttpOptions(
                 base_url=base_url,
                 retry_options=_RETRY_OPTIONS,
             ) if base_url else HttpOptions(retry_options=_RETRY_OPTIONS),
         )
+        return _patch_client_for_proxy(client)
 
 
 # ── Model selector ─────────────────────────────────────────────────────────────
