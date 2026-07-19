@@ -1,0 +1,12 @@
+# Config for 03_workflow_agent.py
+
+prompt_file: "prompts/topic.txt"
+
+agents:
+  content_researcher:
+    instruction_file: "prompts/content_researcher.txt"
+    description: "Researches and explains engineering concepts at undergraduate level."
+
+  lecture_planner:
+    instruction_file: "prompts/lecture_planner.txt"
+    description: "Formats technical content into a structured 1-hour lecture plan."
