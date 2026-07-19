@@ -1,0 +1,39 @@
+{
+  "eval_set_id": "eval_set_1",
+  "name": "eval_set_1",
+  "eval_cases": [
+    {
+      "eval_id": "Show_me_contact_details_for_GAT",
+      "conversation": [
+        {
+          "invocation_id": "e-2e4aea4e-6c4f-4782-a0bd-3dfec9acd596",
+          "user_content": {
+            "parts": [
+              {
+                "text": "Show me contact details for GAT"
+              }
+            ],
+            "role": "user"
+          },
+          "final_response": {
+            "parts": [
+              {
+                "text": "Hello! I am GATInfoAgent. Here are the contact details for the Global Academy of Technology:\n\n**Address:**\nAditya Layout, Rajarajeshwari Nagar, Bengaluru, Karnataka 560098\n\n**Phone Numbers:**\n*   **General Enquiries:** 080-28603158 / 080-28603157\n*   **Admission:** +91-9902463002 / +91-9243190105\n\n**Email:**\n*   **General:** info@gat.ac.in\n*   **Admissions:** admissions@gat.ac.in\n\nLet me know if you need any further assistance!",
+                "thought_signature": "EjQKMgERTTIPpDdLQMVtKVkWjEP8zxOY-JZh3_h81joOyI56jNA7uaEfFKYEl9-JfqEIBIch"
+              }
+            ],
+            "role": "model"
+          },
+          "intermediate_data": {},
+          "creation_timestamp": 1783959317.904879
+        }
+      ],
+      "session_input": {
+        "app_name": "tool_agent",
+        "user_id": "user"
+      },
+      "creation_timestamp": 1783960093.772471
+    }
+  ],
+  "creation_timestamp": 1783960081.585233
+}
