@@ -232,7 +232,7 @@ In Step 8, use these values:
 
 ```
 GEMINI_API_KEY=AIza...your_key_here...
-GEMINI_MODEL=gemini-3.1-flash-lite
+GEMINI_MODEL=gemini-2.0-flash-lite
 GOOGLE_GENAI_USE_VERTEXAI=FALSE
 ```
 

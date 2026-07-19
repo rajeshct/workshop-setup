@@ -23,3 +23,6 @@ __pycache__/
 dist/
 build/
 *.egg-info/
+
+# ADK generated session/state directories
+.adk/

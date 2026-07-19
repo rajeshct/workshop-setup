@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Workshop Setup Guide — Google ADK + Comet OPIK</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --border: #2a2d3a;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --accent: #4a9eff;
+    --green: #2ecc71;
+    --yellow: #f9a825;
+    --orange: #ff6b35;
+    --code-bg: #12151f;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+  }
+  .page-header {
+    background: linear-gradient(135deg, #1a2a45 0%, #0f1117 100%);
+    border-bottom: 2px solid var(--accent);
+    padding: 48px 40px 36px;
+    text-align: center;
+  }
+  .page-header h1 { font-size: 2rem; font-weight: 700; color: #fff; }
+  .page-header .subtitle { color: var(--accent); font-size: 1rem; margin-top: 8px; font-weight: 500; }
+  .page-header .est { color: var(--muted); font-size: 0.9rem; margin-top: 6px; }
+  .container { max-width: 860px; margin: 0 auto; padding: 40px 24px 80px; }
+  .step-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 48px 0 20px;
+  }
+  .step-number {
+    background: var(--accent);
+    color: #000;
+    font-weight: 800;
+    font-size: 1rem;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .step-header h2 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #fff;
+  }
+  h2 { font-size: 1.4rem; font-weight: 700; color: #fff; margin: 40px 0 16px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  h3 { font-size: 1.05rem; font-weight: 600; color: var(--accent); margin: 24px 0 10px; }
+  p { margin: 12px 0; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  hr { border: none; border-top: 1px solid var(--border); margin: 36px 0; }
+  blockquote {
+    border-left: 3px solid var(--accent);
+    background: var(--surface);
+    padding: 14px 20px;
+    border-radius: 0 8px 8px 0;
+    margin: 16px 0;
+    color: var(--muted);
+  }
+  blockquote strong { color: var(--text); }
+  .info-box {
+    background: #0d2a3a;
+    border: 1px solid #1a4a6a;
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin: 16px 0;
+    font-size: 0.92rem;
+  }
+  .warning-box {
+    background: #1a1200;
+    border: 1px solid #5a4000;
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin: 16px 0;
+    font-size: 0.92rem;
+  }
+  .warning-box strong { color: var(--orange); }
+  .success-box {
+    background: #0a2a1a;
+    border: 1px solid #1a5a3a;
+    border-radius: 8px;
+    padding: 14px 20px;
+    margin: 16px 0;
+    font-size: 0.92rem;
+  }
+  .success-box strong { color: var(--green); }
+  .os-tabs {
+    display: flex;
+    gap: 0;
+    margin: 20px 0 0;
+    border-bottom: 2px solid var(--border);
+  }
+  .os-tab {
+    padding: 8px 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    background: none;
+    color: var(--muted);
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: all 0.15s;
+  }
+  .os-label {
+    display: inline-block;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2px 10px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--muted);
+    margin: 16px 0 6px;
+  }
+  .os-label.mac { color: #a0c4ff; border-color: #2a4a6a; background: #0d2030; }
+  .os-label.win { color: #90caf9; border-color: #1a3a5a; background: #081828; }
+  table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.9rem; }
+  th { background: #1e2535; color: var(--accent); font-weight: 600; text-align: left; padding: 10px 14px; border: 1px solid var(--border); }
+  td { padding: 9px 14px; border: 1px solid var(--border); vertical-align: top; }
+  tr:nth-child(even) td { background: #14172080; }
+  code {
+    background: var(--code-bg);
+    color: #a5d6a7;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 0.85em;
+  }
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 20px;
+    overflow-x: auto;
+    margin: 10px 0 16px;
+  }
+  pre code {
+    background: none;
+    padding: 0;
+    font-size: 0.875rem;
+    color: #e2e8f0;
+    line-height: 1.65;
+  }
+  pre .comment { color: #5c6370; font-style: italic; }
+  ul, ol { padding-left: 24px; margin: 10px 0; }
+  li { margin: 6px 0; }
+  strong { color: #fff; }
+  .toc {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin: 32px 0;
+  }
+  .toc h3 { margin: 0 0 12px; color: var(--muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  .toc ol { margin: 0; }
+  .toc li { margin: 4px 0; font-size: 0.9rem; }
+  .troubleshoot-item { margin: 20px 0; }
+  .troubleshoot-item .error {
+    background: #1a0a0a;
+    border: 1px solid #4a1a1a;
+    border-radius: 6px 6px 0 0;
+    padding: 10px 16px;
+    font-family: monospace;
+    font-size: 0.85rem;
+    color: #ff8a80;
+  }
+  .troubleshoot-item .fix {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 6px 6px;
+    padding: 10px 16px;
+    font-size: 0.9rem;
+    color: var(--muted);
+  }
+  .quick-ref-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    margin: 16px 0;
+  }
+  .quick-ref-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+  }
+  .quick-ref-card .label { color: var(--muted); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 4px; }
+  .quick-ref-card code { font-size: 0.78rem; }
+  @media (max-width: 600px) { .quick-ref-grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>Workshop Setup Guide</h1>
+  <div class="subtitle">Google ADK + Comet OPIK — Engineering Faculty Workshop</div>
+  <div class="est">Estimated setup time: 20–25 minutes &nbsp;·&nbsp; Complete before the workshop session</div>
+</div>
+
+<div class="container">
+
+  <div class="toc">
+    <h3>Steps</h3>
+    <ol>
+      <li><a href="#step1">Install Git</a></li>
+      <li><a href="#step2">Install Python 3.11+</a></li>
+      <li><a href="#step3">Install VS Code</a></li>
+      <li><a href="#step4">Set Up Your AI Model (Ollama or Gemini)</a></li>
+      <li><a href="#step5">Create a Comet OPIK Account</a></li>
+      <li><a href="#step6">Clone the Repository</a></li>
+      <li><a href="#step7">Create Virtual Environment &amp; Install Dependencies</a></li>
+      <li><a href="#step8">Configure Your API Keys</a></li>
+      <li><a href="#step9">Verify Your Setup</a></li>
+    </ol>
+  </div>
+
+  <h2>What You Will Set Up</h2>
+  <table>
+    <thead><tr><th>Tool</th><th>Purpose</th></tr></thead>
+    <tbody>
+      <tr><td>Git</td><td>Clone the workshop repository</td></tr>
+      <tr><td>Python 3.11+</td><td>Run Python code during the workshop</td></tr>
+      <tr><td>VS Code</td><td>Code editor for the workshop</td></tr>
+      <tr><td>Ollama</td><td>Run a local AI model — <strong>no internet, no rate limits, no API key</strong> (recommended)</td></tr>
+      <tr><td>Google AI Studio account</td><td>Free Gemini API key — backup option if Ollama is not possible</td></tr>
+      <tr><td>Comet OPIK account</td><td>Free observability platform for monitoring AI calls</td></tr>
+      <tr><td>Project dependencies</td><td><code>google-adk</code>, <code>opik</code>, <code>python-dotenv</code></td></tr>
+    </tbody>
+  </table>
+
+  <blockquote>
+    <strong>Why Ollama?</strong> Gemini's free tier has rate limits (requests per minute). In a classroom with 20–30 people, participants can hit those limits quickly. Ollama runs a model locally on your own machine — no quota, no internet dependency, no API key needed.
+  </blockquote>
+
+  <hr>
+
+  <!-- STEP 1 -->
+  <div id="step1" class="step-header">
+    <div class="step-number">1</div>
+    <h2>Install Git</h2>
+  </div>
+
+  <div class="os-label mac">macOS</div>
+  <p>Open <strong>Terminal</strong> (<code>Cmd + Space</code> → type <code>Terminal</code> → press <code>Enter</code>).</p>
+  <pre><code>git --version</code></pre>
+  <p>If Git is already installed you will see something like <code>git version 2.x.x</code> — skip to Step 2.</p>
+  <p>If not, macOS will prompt you to install <strong>Xcode Command Line Tools</strong> — click <strong>Install</strong> and wait, then re-run the command above to confirm.</p>
+
+  <div class="os-label win">Windows</div>
+  <p>Open <strong>PowerShell</strong> (<code>Win + S</code> → type <code>PowerShell</code> → press <code>Enter</code>).</p>
+  <pre><code>git --version</code></pre>
+  <p>If not installed, download and run the installer from <a href="https://git-scm.com/download/win" target="_blank">git-scm.com/download/win</a>. Leave all defaults as-is. After install, close and reopen PowerShell, then run <code>git --version</code> to confirm.</p>
+
+  <hr>
+
+  <!-- STEP 2 -->
+  <div id="step2" class="step-header">
+    <div class="step-number">2</div>
+    <h2>Install Python 3.11 or Higher</h2>
+  </div>
+
+  <div class="os-label mac">macOS</div>
+  <pre><code>python3 --version</code></pre>
+  <p>If the output is <code>Python 3.11.x</code> or higher, skip to Step 3. If not:</p>
+  <ol>
+    <li>Install <strong>Homebrew</strong> if you don't have it yet:
+      <pre><code>/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"</code></pre>
+    </li>
+    <li>Install Python:
+      <pre><code>brew install python@3.13</code></pre>
+    </li>
+    <li>Verify:
+      <pre><code>python3 --version
+<span class="comment"># Expected: Python 3.13.x</span></code></pre>
+    </li>
+  </ol>
+
+  <div class="os-label win">Windows</div>
+  <pre><code>python --version</code></pre>
+  <p>If the output is <code>Python 3.11.x</code> or higher, skip to Step 3. If not:</p>
+  <ol>
+    <li>Go to <a href="https://www.python.org/downloads" target="_blank">python.org/downloads</a></li>
+    <li>Click <strong>Download Python 3.13.x</strong></li>
+    <li>Run the installer</li>
+    <li><strong>Important:</strong> Check the box <strong>"Add python.exe to PATH"</strong> on the first screen</li>
+    <li>Click <strong>Install Now</strong></li>
+  </ol>
+  <p>Verify (close and reopen PowerShell first):</p>
+  <pre><code>python --version
+<span class="comment"># Expected: Python 3.13.x</span></code></pre>
+
+  <hr>
+
+  <!-- STEP 3 -->
+  <div id="step3" class="step-header">
+    <div class="step-number">3</div>
+    <h2>Install VS Code</h2>
+  </div>
+
+  <ol>
+    <li>Go to <a href="https://code.visualstudio.com" target="_blank">code.visualstudio.com</a></li>
+    <li>Click <strong>Download for Mac</strong> or <strong>Download for Windows</strong></li>
+    <li>Run the installer</li>
+  </ol>
+
+  <div class="os-label mac">macOS — add to Applications</div>
+  <p>Open the downloaded <code>.zip</code>, drag <strong>Visual Studio Code.app</strong> into your <strong>Applications</strong> folder. Then add the <code>code</code> command to your terminal:</p>
+  <ul>
+    <li>Open VS Code → press <code>Cmd + Shift + P</code></li>
+    <li>Type <code>Shell Command: Install 'code' command in PATH</code> and press <code>Enter</code></li>
+  </ul>
+  <pre><code>code --version</code></pre>
+
+  <div class="os-label win">Windows — installer options</div>
+  <p>During install, check both boxes:</p>
+  <ul>
+    <li><strong>Add "Open with Code" action to Windows Explorer file context menu</strong></li>
+    <li><strong>Add to PATH</strong></li>
+  </ul>
+  <pre><code>code --version</code></pre>
+
+  <h3>Recommended VS Code Extensions</h3>
+  <ol>
+    <li>Open VS Code → click the <strong>Extensions</strong> icon in the left sidebar (<code>Ctrl/Cmd + Shift + X</code>)</li>
+    <li>Search for and install:
+      <ul>
+        <li><strong>Python</strong> (by Microsoft)</li>
+        <li><strong>Python Debugger</strong> (by Microsoft)</li>
+      </ul>
+    </li>
+  </ol>
+
+  <hr>
+
+  <!-- STEP 4 -->
+  <div id="step4" class="step-header">
+    <div class="step-number">4</div>
+    <h2>Set Up Your AI Model</h2>
+  </div>
+
+  <p>You need a model for the workshop. <strong>Choose one option:</strong></p>
+
+  <h3>Option A — Ollama (Recommended)</h3>
+  <p>Ollama runs a large language model locally on your machine. No API key, no rate limits, no internet required. Needs ~4 GB of free disk space.</p>
+
+  <div class="os-label mac">macOS — Install Ollama</div>
+  <pre><code>brew install ollama</code></pre>
+  <p>Alternatively, download the macOS app from <a href="https://ollama.com/download" target="_blank">ollama.com/download</a> and drag it to Applications.</p>
+
+  <div class="os-label win">Windows — Install Ollama</div>
+  <p>Download and run the installer from <a href="https://ollama.com/download" target="_blank">ollama.com/download</a>. After install, Ollama runs as a background service automatically.</p>
+
+  <h3>Pull a Model (one-time download, ~4 GB)</h3>
+  <pre><code>ollama pull llama3.2</code></pre>
+  <p>Wait for the download to finish. Verify:</p>
+  <pre><code>ollama list
+<span class="comment"># Should show: llama3.2   ...</span></code></pre>
+  <blockquote>Other models that work well: <code>gemma3</code>, <code>mistral</code>. <code>llama3.2</code> is the recommended default.</blockquote>
+
+  <h3>Start Ollama</h3>
+  <div class="os-label mac">macOS (Homebrew install)</div>
+  <pre><code>ollama serve</code></pre>
+  <p>Leave this terminal window open. Ollama runs at <code>http://localhost:11434</code>.</p>
+  <p>If you installed the app: it starts automatically (look for the llama icon in your menu bar).</p>
+
+  <div class="os-label win">Windows</div>
+  <p>Starts automatically as a background service after install.</p>
+
+  <div class="success-box">
+    <strong>Verify Ollama is running:</strong>
+    <pre><code>ollama list
+<span class="comment"># Should respond without error and show your downloaded model</span></code></pre>
+  </div>
+
+  <p><strong>.env settings for Ollama</strong> (use in Step 8):</p>
+  <pre><code>GEMINI_MODEL=ollama/llama3.2</code></pre>
+
+  <hr>
+
+  <h3>Option B — Google Gemini (Backup)</h3>
+  <div class="warning-box">
+    <strong>Rate limit warning:</strong> The free Gemini tier allows ~15 requests/minute per key. Each person must use their <strong>own</strong> key — do not share one key across participants.
+  </div>
+
+  <ol>
+    <li>Go to <a href="https://aistudio.google.com" target="_blank">aistudio.google.com</a></li>
+    <li>Sign in with your Google account</li>
+    <li>Click <strong>Get API key</strong> → <strong>Create API key in new project</strong></li>
+    <li>Copy the key — it starts with <code>AIza...</code></li>
+  </ol>
+
+  <p><strong>.env settings for Gemini</strong> (use in Step 8):</p>
+  <pre><code>GEMINI_API_KEY=AIza...your_key_here...
+GEMINI_MODEL=gemini-2.0-flash-lite
+GOOGLE_GENAI_USE_VERTEXAI=FALSE</code></pre>
+
+  <hr>
+
+  <!-- STEP 5 -->
+  <div id="step5" class="step-header">
+    <div class="step-number">5</div>
+    <h2>Create a Comet OPIK Account</h2>
+  </div>
+
+  <ol>
+    <li>Go to <a href="https://www.comet.com/signup" target="_blank">comet.com/signup</a></li>
+    <li>Sign up with your email (no credit card required)</li>
+    <li>After signing in, go to <strong>Settings → API Keys</strong> (top-right user menu → Settings)</li>
+    <li>Click <strong>Generate API Key</strong> and copy it</li>
+    <li>Note your <strong>workspace name</strong> — shown in the top-left of the dashboard after login</li>
+  </ol>
+
+  <blockquote>Keep both the API key and workspace name handy for Step 8.</blockquote>
+
+  <hr>
+
+  <!-- STEP 6 -->
+  <div id="step6" class="step-header">
+    <div class="step-number">6</div>
+    <h2>Clone the Repository</h2>
+  </div>
+
+  <div class="os-label mac">macOS</div>
+  <pre><code>git clone https://github.com/rajeshct/workshop-setup.git
+cd workshop-setup</code></pre>
+
+  <div class="os-label win">Windows</div>
+  <pre><code>git clone https://github.com/rajeshct/workshop-setup.git
+cd workshop-setup</code></pre>
+
+  <p>Open the project in VS Code:</p>
+  <pre><code>code .</code></pre>
+
+  <hr>
+
+  <!-- STEP 7 -->
+  <div id="step7" class="step-header">
+    <div class="step-number">7</div>
+    <h2>Create a Virtual Environment and Install Dependencies</h2>
+  </div>
+
+  <p>A virtual environment keeps this project's packages isolated from the rest of your system.</p>
+  <table>
+    <thead><tr><th>Package</th><th>Minimum Version</th><th>Purpose</th></tr></thead>
+    <tbody>
+      <tr><td><code>google-adk</code></td><td>0.4.0</td><td>Google Agent Development Kit</td></tr>
+      <tr><td><code>opik</code></td><td>1.7.0</td><td>Comet OPIK observability</td></tr>
+      <tr><td><code>python-dotenv</code></td><td>1.0.0</td><td>Load <code>.env</code> configuration</td></tr>
+    </tbody>
+  </table>
+
+  <div class="os-label mac">macOS</div>
+  <pre><code><span class="comment"># Create the virtual environment</span>
+python3 -m venv .venv
+
+<span class="comment"># Activate it</span>
+source .venv/bin/activate
+
+<span class="comment"># You should see (.venv) at the start of your prompt</span>
+
+<span class="comment"># Install dependencies</span>
+pip install -r requirements.txt</code></pre>
+
+  <div class="os-label win">Windows (PowerShell)</div>
+  <pre><code><span class="comment"># Create the virtual environment</span>
+python -m venv .venv
+
+<span class="comment"># Activate it</span>
+.venv\Scripts\Activate.ps1
+
+<span class="comment"># You should see (.venv) at the start of your prompt</span>
+
+<span class="comment"># Install dependencies</span>
+pip install -r requirements.txt</code></pre>
+
+  <div class="info-box">
+    <strong>Windows note:</strong> If you see a "running scripts is disabled" error when activating, run this first:
+    <pre><code>Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser</code></pre>
+    Then run the <code>Activate.ps1</code> command again.
+  </div>
+
+  <h3>Select the virtual environment in VS Code</h3>
+  <ol>
+    <li>Press <code>Cmd/Ctrl + Shift + P</code> → type <strong>Python: Select Interpreter</strong></li>
+    <li>Choose the entry showing <code>.venv</code> — e.g. <code>Python 3.13.x ('.venv': venv)</code></li>
+  </ol>
+
+  <h3>Verify installation</h3>
+  <pre><code>pip show google-adk opik python-dotenv</code></pre>
+  <p>You should see name and version information for all three packages.</p>
+
+  <hr>
+
+  <!-- STEP 8 -->
+  <div id="step8" class="step-header">
+    <div class="step-number">8</div>
+    <h2>Configure Your API Keys</h2>
+  </div>
+
+  <p>Copy the example config file:</p>
+
+  <div class="os-label mac">macOS</div>
+  <pre><code>cp .env.example .env</code></pre>
+
+  <div class="os-label win">Windows</div>
+  <pre><code>copy .env.example .env</code></pre>
+
+  <p>Open <code>.env</code> in VS Code (<code>code .env</code>) and fill in your values.</p>
+
+  <h3>If you chose Ollama (Option A)</h3>
+  <pre><code>GEMINI_MODEL=ollama/llama3.2
+
+OPIK_API_KEY=your_opik_api_key_here
+OPIK_WORKSPACE=your_workspace_name_here
+OPIK_PROJECT_NAME=engineering-faculty-assistant</code></pre>
+
+  <h3>If you chose Gemini (Option B)</h3>
+  <pre><code>GEMINI_API_KEY=AIza...your_key_here...
+GEMINI_MODEL=gemini-2.0-flash-lite
+GOOGLE_GENAI_USE_VERTEXAI=FALSE
+
+OPIK_API_KEY=your_opik_api_key_here
+OPIK_WORKSPACE=your_workspace_name_here
+OPIK_PROJECT_NAME=engineering-faculty-assistant</code></pre>
+
+  <blockquote>Do <strong>not</strong> add quotes around values, and do <strong>not</strong> add spaces around the <code>=</code> sign.</blockquote>
+
+  <hr>
+
+  <!-- STEP 9 -->
+  <div id="step9" class="step-header">
+    <div class="step-number">9</div>
+    <h2>Verify Your Setup</h2>
+  </div>
+
+  <h3>Check Python packages are installed</h3>
+  <pre><code>pip show google-adk opik python-dotenv</code></pre>
+  <p>All three should show a name and version.</p>
+
+  <h3>Check Ollama (if you chose Option A)</h3>
+  <pre><code>ollama list</code></pre>
+  <p>Should show <code>llama3.2</code> in the list without any error.</p>
+
+  <h3>Check your .env file</h3>
+  <p>Open <code>.env</code> in VS Code and confirm:</p>
+  <ul>
+    <li><code>GEMINI_MODEL</code> is set</li>
+    <li><code>OPIK_API_KEY</code> and <code>OPIK_WORKSPACE</code> are filled in (not the placeholder text)</li>
+  </ul>
+
+  <div class="success-box">
+    <strong>If all three checks pass, you are ready for the workshop.</strong>
+  </div>
+
+  <hr>
+
+  <!-- TROUBLESHOOTING -->
+  <h2>Troubleshooting</h2>
+
+  <div class="troubleshoot-item">
+    <div class="error"><code>python3: command not found</code> (macOS)</div>
+    <div class="fix">Python is not installed or not on your PATH. Repeat Step 2.</div>
+  </div>
+  <div class="troubleshoot-item">
+    <div class="error"><code>python: command not found</code> (Windows)</div>
+    <div class="fix">Python was installed without the "Add to PATH" option. Reinstall Python and check that box.</div>
+  </div>
+  <div class="troubleshoot-item">
+    <div class="error"><code>ModuleNotFoundError: No module named 'google.adk'</code></div>
+    <div class="fix">The virtual environment is not active. Run <code>source .venv/bin/activate</code> (macOS) or <code>.venv\Scripts\Activate.ps1</code> (Windows) and try again.</div>
+  </div>
+  <div class="troubleshoot-item">
+    <div class="error"><code>Connection refused</code> or <code>Failed to connect to localhost:11434</code> (Ollama)</div>
+    <div class="fix">Ollama is not running. On macOS (Homebrew), open a new terminal and run <code>ollama serve</code>. On Windows, check that Ollama is running in the system tray.</div>
+  </div>
+  <div class="troubleshoot-item">
+    <div class="error"><code>model 'llama3.2' not found</code> (Ollama)</div>
+    <div class="fix">The model was not downloaded. Run <code>ollama pull llama3.2</code> and wait for it to finish.</div>
+  </div>
+  <div class="troubleshoot-item">
+    <div class="error"><code>429 Resource Exhausted</code> or <code>quota exceeded</code> (Gemini)</div>
+    <div class="fix">You have hit the free-tier rate limit. Switch to Ollama (Option A in Step 4) or wait a minute and try again.</div>
+  </div>
+  <div class="troubleshoot-item">
+    <div class="error"><code>AuthenticationError</code> from Gemini</div>
+    <div class="fix">Your <code>GEMINI_API_KEY</code> is wrong or expired. Go back to <a href="https://aistudio.google.com" target="_blank">aistudio.google.com</a>, generate a new key, and paste it into <code>.env</code>.</div>
+  </div>
+  <div class="troubleshoot-item">
+    <div class="error"><code>running scripts is disabled</code> on Windows</div>
+    <div class="fix">See the note in Step 7 about <code>Set-ExecutionPolicy</code>.</div>
+  </div>
+  <div class="troubleshoot-item">
+    <div class="error">VS Code shows "No interpreter selected" or can't find packages</div>
+    <div class="fix">Open Command Palette (<code>Cmd/Ctrl + Shift + P</code>) → <strong>Python: Select Interpreter</strong> → choose the <code>.venv</code> entry.</div>
+  </div>
+
+  <hr>
+
+  <!-- QUICK REFERENCE -->
+  <h2>Quick Reference</h2>
+  <div class="quick-ref-grid">
+    <div class="quick-ref-card">
+      <div class="label">Activate venv — macOS</div>
+      <code>source .venv/bin/activate</code>
+    </div>
+    <div class="quick-ref-card">
+      <div class="label">Activate venv — Windows</div>
+      <code>.venv\Scripts\Activate.ps1</code>
+    </div>
+    <div class="quick-ref-card">
+      <div class="label">Open project in VS Code</div>
+      <code>code .</code>
+    </div>
+    <div class="quick-ref-card">
+      <div class="label">Deactivate venv</div>
+      <code>deactivate</code>
+    </div>
+    <div class="quick-ref-card">
+      <div class="label">Start Ollama (macOS Homebrew)</div>
+      <code>ollama serve</code>
+    </div>
+    <div class="quick-ref-card">
+      <div class="label">Run agents web UI</div>
+      <code>adk web web_agents --port 8081</code>
+    </div>
+  </div>
+
+  <hr>
+
+  <div class="info-box" style="text-align:center; color:var(--muted);">
+    Need help? Contact the workshop organiser before the session if you get stuck on any step.<br>
+    Having your setup complete before the session ensures you can follow along from the start.
+  </div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Building AI Agents with Google ADK & Comet OPIK</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --border: #2a2d3a;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --accent: #4a9eff;
+    --green: #2ecc71;
+    --yellow: #f9a825;
+    --orange: #ff6b35;
+    --code-bg: #12151f;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+  }
+  .page-header {
+    background: linear-gradient(135deg, #1a2a45 0%, #0f1117 100%);
+    border-bottom: 2px solid var(--accent);
+    padding: 48px 40px 36px;
+    text-align: center;
+  }
+  .page-header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: -0.5px;
+  }
+  .page-header .subtitle {
+    color: var(--accent);
+    font-size: 1rem;
+    margin-top: 8px;
+    font-weight: 500;
+  }
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+  h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #fff;
+    margin: 48px 0 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  h3 {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--accent);
+    margin: 28px 0 10px;
+  }
+  p { margin: 12px 0; color: var(--text); }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  hr {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 40px 0;
+  }
+  blockquote {
+    border-left: 3px solid var(--accent);
+    background: var(--surface);
+    padding: 16px 20px;
+    border-radius: 0 8px 8px 0;
+    margin: 16px 0;
+    color: var(--muted);
+    font-style: italic;
+  }
+  blockquote strong { color: var(--text); font-style: normal; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 0.9rem;
+  }
+  th {
+    background: #1e2535;
+    color: var(--accent);
+    font-weight: 600;
+    text-align: left;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+  }
+  td {
+    padding: 9px 14px;
+    border: 1px solid var(--border);
+    vertical-align: top;
+  }
+  tr:nth-child(even) td { background: #14172080; }
+  code {
+    background: var(--code-bg);
+    color: #a5d6a7;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+    font-size: 0.85em;
+  }
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    overflow-x: auto;
+    margin: 16px 0;
+  }
+  pre code {
+    background: none;
+    padding: 0;
+    font-size: 0.875rem;
+    color: #e2e8f0;
+    line-height: 1.6;
+  }
+  ul, ol {
+    padding-left: 24px;
+    margin: 12px 0;
+  }
+  li { margin: 6px 0; }
+  strong { color: #fff; }
+  .mermaid {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 24px;
+    margin: 20px 0;
+    text-align: center;
+  }
+  .section { margin-bottom: 8px; }
+</style>
+</head>
+<body>
+<div class="page-header">
+  <h1>Building AI Agents with Google ADK &amp; Comet OPIK</h1>
+  <div class="subtitle">Global Academy of Technology — Engineering Faculty Workshop</div>
+</div>
+
+<div class="container">
+
+  <h2>The Real Cost of Doing It Manually</h2>
+  <table>
+    <thead><tr><th>Task</th><th>Manual with AI Assistant</th><th>With an AI Agent</th></tr></thead>
+    <tbody>
+      <tr><td>Grade 30 lab reports</td><td>30 separate interactions — paste, wait, paste, wait</td><td>All 30 graded simultaneously — time of 1</td></tr>
+      <tr><td>Generate exam papers for 4 departments</td><td>4 × 2 manual steps (topic → concepts → questions)</td><td>One command, all 4 pipelines run automatically</td></tr>
+      <tr><td>Track 10 students across a semester</td><td>Re-paste full history every single conversation</td><td>Agent remembers everything across all sessions</td></tr>
+      <tr><td>Answer department queries all day</td><td>You decide which expert to consult each time</td><td>Router agent delegates automatically</td></tr>
+      <tr><td>Improve a weak student report</td><td>Paste → read feedback → edit → paste again, repeat</td><td>Loop agent iterates until quality threshold met</td></tr>
+    </tbody>
+  </table>
+
+  <hr>
+
+  <h2>Why Is Everyone Moving to AI Agents Now?</h2>
+  <table>
+    <thead><tr><th>Company</th><th>What they are doing</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Google</strong></td><td>Released ADK and Vertex AI Agent Builder — making agent development a core product</td></tr>
+      <tr><td><strong>Microsoft</strong></td><td>Copilot Studio and Azure AI Agent Service — agents embedded across Office 365</td></tr>
+      <tr><td><strong>Amazon</strong></td><td>Amazon Q — autonomous agents for software development and business workflows</td></tr>
+      <tr><td><strong>Salesforce</strong></td><td>Agentforce — AI agents handling customer service, sales, and operations autonomously</td></tr>
+    </tbody>
+  </table>
+  <p><strong>The pattern is clear:</strong> 2023–2024 was the era of AI assistants. 2025 onwards is the era of AI agents.</p>
+  <p>The difference is autonomy:</p>
+  <ul>
+    <li>An <strong>AI assistant</strong> waits for you to ask a question and answers it</li>
+    <li>An <strong>AI agent</strong> is given a goal and figures out how to achieve it — using tools, memory, and other agents</li>
+  </ul>
+
+  <hr>
+
+  <h2>What is the Difference? AI Assistant vs AI Agent</h2>
+  <blockquote>
+    <strong>LLM (Large Language Model)</strong> — the AI brain underneath ChatGPT, Claude, and Gemini. It predicts the next token given a prompt. An AI assistant wraps an LLM in a chat interface — it can remember within a conversation, but it only <em>responds</em>. An AI agent wraps an LLM in a program that can also <em>act</em> — call tools, chain steps, loop, and take decisions without waiting for you to prompt it each time.
+  </blockquote>
+
+  <p>An <strong>AI agent</strong> can:</p>
+  <ul>
+    <li><strong>Use tools</strong> — call APIs, fetch web pages, query databases, run code</li>
+    <li><strong>Remember</strong> — maintain context across a session or multiple sessions</li>
+    <li><strong>Chain steps</strong> — run a pipeline of tasks automatically with no human in the loop</li>
+    <li><strong>Act in parallel</strong> — process multiple things simultaneously</li>
+    <li><strong>Loop</strong> — repeat a task until a quality condition is met</li>
+    <li><strong>Route</strong> — decide which specialist to delegate a task to</li>
+  </ul>
+
+  <table>
+    <thead><tr><th></th><th>AI Assistant (ChatGPT / Claude / Gemini)</th><th>AI Agent (ADK)</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Memory</strong></td><td>Remembers within a session — but only what you explicitly tell it</td><td>Remembers full session history automatically, and can persist across sessions</td></tr>
+      <tr><td><strong>Live data</strong></td><td>Limited to training data by default</td><td>Fetches live data via tools natively</td></tr>
+      <tr><td><strong>Multi-step tasks</strong></td><td>You manually carry outputs between steps</td><td>Pipeline runs end-to-end automatically</td></tr>
+      <tr><td><strong>Parallel work</strong></td><td>One thing at a time</td><td>Multiple tasks simultaneously</td></tr>
+      <tr><td><strong>Iteration</strong></td><td>You manually paste-edit-paste</td><td>Loops automatically until quality met</td></tr>
+      <tr><td><strong>Transparency</strong></td><td>No audit trail</td><td>Full trace — every step auditable</td></tr>
+    </tbody>
+  </table>
+
+  <hr>
+
+  <h2>How Does an AI Agent Actually Work?</h2>
+  <p>At its core, every AI agent follows this loop:</p>
+  <div class="mermaid">
+flowchart TD
+    U["User sends a message"]
+    T["Agent thinks: What do I need to do? Do I need any tools?"]
+    C{"Need a tool?"}
+    TL["Call the tool (fetch data, query DB, run code)"]
+    TR["Get tool result back into context"]
+    R["Generate final response using LLM reasoning"]
+    O["Return response to user"]
+    U --> T --> C
+    C -->|"Yes"| TL --> TR --> T
+    C -->|"No"| R --> O
+  </div>
+  <p>The key insight: <strong>the agent loops</strong>. It keeps calling tools and feeding results back into the LLM until it has everything it needs.</p>
+
+  <hr>
+
+  <h2>Mental Model — How to Think About an Agent</h2>
+  <blockquote>
+    <em>"Before we look at the code, here is a simple mental model that will make everything click."</em>
+  </blockquote>
+  <p>Think of an AI agent like a <strong>smart employee</strong> you have just hired:</p>
+  <table>
+    <thead><tr><th>Concept</th><th>Smart Employee</th><th>AI Agent</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Instruction</strong></td><td>Job description</td><td>System prompt — the agent's identity, scope, and constraints</td></tr>
+      <tr><td><strong>Tools</strong></td><td>Email, CRM, database</td><td>Python functions — fetch a URL, query a DB, call an API</td></tr>
+      <tr><td><strong>Memory</strong></td><td>Keeps notes across meetings</td><td><code>session_id</code> — full conversation history carried across turns</td></tr>
+      <tr><td><strong>Reasoning</strong></td><td>Reads the situation and decides what to do next</td><td>LLM — decides which tool to call and what to say</td></tr>
+      <tr><td><strong>Manager</strong></td><td>Delegates tasks to specialists</td><td>Router agent — reads the request, delegates to the right sub-agent</td></tr>
+      <tr><td><strong>Auditor</strong></td><td>Keeps a log of every decision</td><td>OPIK — records every step, input, output, and cost</td></tr>
+    </tbody>
+  </table>
+
+  <hr>
+
+  <h2>Why Not Just Use the Raw API or Other Frameworks?</h2>
+  <table>
+    <thead><tr><th>Approach</th><th>What it is</th><th>The real cost</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Raw API calls</strong></td><td>Call the LLM API directly</td><td>200+ lines of glue code before any real logic</td></tr>
+      <tr><td><strong>LangChain / LlamaIndex</strong></td><td>Popular libraries with chains, agents, retrievers</td><td>Heavy abstractions — fights you when requirements grow</td></tr>
+      <tr><td><strong>CrewAI / AutoGen</strong></td><td>Role-based multi-agent frameworks</td><td>Opaque execution — hard to trace what each agent decided</td></tr>
+      <tr><td><strong>Build your own</strong></td><td>Custom orchestration on top of the raw API</td><td>Weeks of infrastructure before writing any agent logic</td></tr>
+      <tr><td><strong>Vertex AI Agent Builder</strong></td><td>Google's no-code / low-code drag-and-drop builder</td><td>Fast to start, hits a wall quickly; hard to version-control</td></tr>
+      <tr><td><strong>Google ADK</strong> ✓</td><td>Open-source, multi-language, platform-agnostic framework</td><td>4 built-in patterns, connects to any tool or service, production-ready</td></tr>
+    </tbody>
+  </table>
+
+  <hr>
+
+  <h2>What is Google ADK?</h2>
+  <blockquote>
+    <strong>Google Agent Development Kit (ADK)</strong> is an open-source, multi-language, platform-agnostic framework for building, orchestrating, and deploying AI agents.
+  </blockquote>
+  <ul>
+    <li>Built by the <strong>Google Gemini team</strong></li>
+    <li><strong>Apache 2.0 license</strong> — free forever, no vendor lock-in</li>
+    <li><strong>Multi-language</strong> — official SDKs for Python and Java</li>
+    <li><strong>Model-agnostic</strong> — Gemini, Ollama, Claude, GPT, or any LiteLLM-compatible model</li>
+    <li><strong>Platform-agnostic</strong> — local laptop, Cloud Run, Vertex AI, or any container</li>
+    <li><strong>Tool ecosystem</strong> — Function tools, built-in Google tools, OpenAPI specs, or MCP servers</li>
+    <li>Reference: <a href="https://adk.dev/get-started/go/" target="_blank">https://adk.dev/get-started/go/</a></li>
+  </ul>
+  <blockquote>
+    <strong>Running locally with no API key:</strong> Set <code>GEMINI_MODEL=ollama/llama3.2</code> in <code>.env</code> and install Ollama — the agent runs entirely on your laptop, free, with no internet required.
+  </blockquote>
+
+  <h3>Why "platform-agnostic" matters</h3>
+  <table>
+    <thead><tr><th></th><th>What it means</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Any language</strong></td><td>Python for data science teams, Java for enterprise backend teams</td></tr>
+      <tr><td><strong>Any model</strong></td><td>Swap Gemini for Ollama (local, free) with one line in <code>.env</code></td></tr>
+      <tr><td><strong>Any cloud</strong></td><td>GCP, AWS, Azure, on-premise, or your own laptop</td></tr>
+      <tr><td><strong>Any tool</strong></td><td>REST APIs, databases, GitHub, Slack — via Function tools or MCP servers</td></tr>
+      <tr><td><strong>Any deployment</strong></td><td>CLI locally → <code>adk api_server</code> for REST → Cloud Run for production</td></tr>
+    </tbody>
+  </table>
+
+  <pre><code><span style="color:#6a9fb5"># An agent is just a code object — no YAML, no magic</span>
+<span style="color:#c678dd">from</span> google.adk.agents <span style="color:#c678dd">import</span> LlmAgent
+
+agent = LlmAgent(
+    name        = <span style="color:#98c379">"HelloAgent"</span>,
+    model       = <span style="color:#98c379">"gemini-2.0-flash"</span>,
+    instruction = <span style="color:#98c379">"You are a helpful assistant for engineering faculty."</span>,
+)</code></pre>
+
+  <hr>
+
+  <h2>ADK vs LangChain vs CrewAI</h2>
+  <table>
+    <thead><tr><th>Criterion</th><th>LangChain</th><th>CrewAI</th><th>Google ADK</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Learning curve</strong></td><td>Steep — chains, callbacks, LCEL</td><td>Moderate — opaque execution</td><td><strong>Gentle — plain code objects</strong></td></tr>
+      <tr><td><strong>Debuggability</strong></td><td>Hard — buried stack traces</td><td>Hard — decisions hidden</td><td><strong>Easy — breakpoints, print, unit-test</strong></td></tr>
+      <tr><td><strong>Multi-agent patterns</strong></td><td>Manual stitching</td><td>Built-in but limited</td><td><strong>4 first-class patterns</strong></td></tr>
+      <tr><td><strong>Language support</strong></td><td>Python only</td><td>Python only</td><td><strong>Python and Java</strong></td></tr>
+      <tr><td><strong>Model support</strong></td><td>Many providers</td><td>OpenAI / Azure mainly</td><td><strong>Gemini, Ollama, Claude, GPT</strong></td></tr>
+      <tr><td><strong>Tool ecosystem</strong></td><td>LangChain tool hub</td><td>Limited</td><td><strong>Function, OpenAPI, Built-in, MCP</strong></td></tr>
+      <tr><td><strong>Observability</strong></td><td>LangSmith (paid)</td><td>No built-in tracing</td><td><strong>OPIK (free, open source)</strong></td></tr>
+      <tr><td><strong>Deployment</strong></td><td>Build your own server</td><td>Build your own server</td><td><strong><code>adk api_server</code> — one command</strong></td></tr>
+      <tr><td><strong>Backed by</strong></td><td>LangChain Inc.</td><td>crewAI startup</td><td><strong>Google / Gemini team</strong></td></tr>
+    </tbody>
+  </table>
+
+  <hr>
+
+  <h2>What Could You Build at GAT?</h2>
+  <table>
+    <thead><tr><th>Idea</th><th>Pattern</th></tr></thead>
+    <tbody>
+      <tr><td>Auto-grade assignment submissions for your course</td><td><code>ParallelAgent</code></td></tr>
+      <tr><td>Answer student queries and route to the right department</td><td>Router</td></tr>
+      <tr><td>Generate lecture notes, quizzes, and assignments from a syllabus</td><td><code>SequentialAgent</code></td></tr>
+      <tr><td>Track student progress across an entire semester</td><td>Memory (<code>session_id</code>)</td></tr>
+      <tr><td>Fetch live data from university portals and answer questions</td><td>Tool use</td></tr>
+      <tr><td>Iteratively improve student project reports until rubric is met</td><td><code>LoopAgent</code></td></tr>
+      <tr><td>Audit every AI decision made in your department</td><td>OPIK tracing</td></tr>
+    </tbody>
+  </table>
+  <blockquote>All of these can be built with the same 6 patterns you will see demonstrated today.</blockquote>
+
+  <hr>
+
+  <h2>Handover to P2</h2>
+  <blockquote>
+    <em>"That covers the big picture — what AI agents are, why the industry is moving to them, and why we chose Google ADK. Now P2 will walk through the 6 agent patterns — the problem each one solves and its architecture diagram. After each pattern, P3 will open the code, run it live, and show you the output. We also have Comet OPIK which makes every agent fully transparent — you will see that introduced after the third pattern."</em>
+  </blockquote>
+
+</div>
+
+<script>mermaid.initialize({ startOnLoad: true, theme: 'dark' });</script>
+</body>
+</html>
