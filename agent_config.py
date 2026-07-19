@@ -39,11 +39,11 @@ load_dotenv()
 
 GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3.1-flash-lite")
 
-# Retry config — retries on 429 (rate limit) and 400 (proxy transient errors)
+# Retry config — retries on 429 (rate limit) with exponential backoff
 _RETRY_OPTIONS = types.HttpRetryOptions(
     initial_delay=5,
     attempts=3,
-    http_status_codes=[400, 408, 429, 500, 502, 503, 504],
+    http_status_codes=[408, 429, 500, 502, 503, 504],
 )
 
 
